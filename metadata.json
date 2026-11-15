@@ -1,0 +1,6 @@
+{
+  "name": "LEOVANISLAND",
+  "description": "Dynamic Island pintar untuk Android yang menampilkan notifikasi, musik, aktivitas perangkat, dan berbagai informasi penting dalam satu floating pill interaktif.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

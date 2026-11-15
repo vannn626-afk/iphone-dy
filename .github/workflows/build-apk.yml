@@ -1,0 +1,103 @@
+name: Build LEOVANISLAND APK
+
+on:
+  push:
+    branches: [ "**" ]
+    tags: [ "v*" ]
+  pull_request:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-apk:
+    name: Build Debug & Release APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Accept Android SDK Licenses
+        run: |
+          yes | sdkmanager --licenses || true
+
+      - name: Prepare Environment & Signing Keystores
+        run: |
+          # 1. Ensure .env exists (copied from .env.example if not present)
+          if [ ! -f ".env" ] && [ -f ".env.example" ]; then
+            cp .env.example .env
+          fi
+
+          # 2. Restore debug.keystore from debug.keystore.base64 if missing
+          if [ ! -f "debug.keystore" ] && [ -f "debug.keystore.base64" ]; then
+            tr -d '[:space:]' < debug.keystore.base64 | base64 -d > debug.keystore
+          elif [ ! -f "debug.keystore" ]; then
+            keytool -genkeypair -v \
+              -keystore debug.keystore \
+              -storepass android \
+              -alias androiddebugkey \
+              -keypass android \
+              -keyalg RSA \
+              -keysize 2048 \
+              -validity 10000 \
+              -dname "CN=Android Debug,O=Android,C=US"
+          fi
+
+          # 3. Generate fallback release keystore (my-upload-key.jks) for assembleRelease
+          if [ ! -f "my-upload-key.jks" ]; then
+            keytool -genkeypair -v \
+              -keystore my-upload-key.jks \
+              -storepass leovanrelease123 \
+              -alias upload \
+              -keypass leovanrelease123 \
+              -keyalg RSA \
+              -keysize 2048 \
+              -validity 10000 \
+              -dname "CN=LEOVANISLAND,OU=Mobile,O=LeovanStudio,L=Jakarta,S=DKI,C=ID"
+          fi
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: wrapper
+
+      - name: Build Debug & Release APK
+        env:
+          KEYSTORE_PATH: ${{ github.workspace }}/my-upload-key.jks
+          STORE_PASSWORD: leovanrelease123
+          KEY_PASSWORD: leovanrelease123
+        run: |
+          gradle :app:assembleDebug :app:assembleRelease --stacktrace
+
+      - name: Prepare Named APK Outputs
+        run: |
+          mkdir -p dist-apk
+          cp app/build/outputs/apk/debug/app-debug.apk dist-apk/LEOVANISLAND-v1.0.0-debug.apk
+          cp app/build/outputs/apk/release/app-release.apk dist-apk/LEOVANISLAND-v1.0.0-release.apk
+          ls -lh dist-apk/
+
+      - name: Upload Debug APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: LEOVANISLAND-Debug-APK
+          path: dist-apk/LEOVANISLAND-v1.0.0-debug.apk
+          if-no-files-found: error
+
+      - name: Upload Release APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: LEOVANISLAND-Release-APK
+          path: dist-apk/LEOVANISLAND-v1.0.0-release.apk
+          if-no-files-found: error

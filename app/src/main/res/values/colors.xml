@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="leovan_black">#FF000000</color>
+    <color name="leovan_card_primary">#FF101010</color>
+    <color name="leovan_card_secondary">#FF181818</color>
+    <color name="leovan_border">#FF252525</color>
+    <color name="leovan_text_primary">#FFFFFFFF</color>
+    <color name="leovan_text_secondary">#FF8E8E93</color>
+    <color name="leovan_status_green">#FF30D158</color>
+    <color name="leovan_status_orange">#FFFF9F0A</color>
+    <color name="leovan_status_red">#FFFF453A</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+</resources>

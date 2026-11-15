@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">LEOVANISLAND</string>
+    <string name="app_subtitle">Dynamic Island Pintar untuk Android</string>
+    <string name="nav_home">Beranda</string>
+    <string name="nav_appearance">Tampilan</string>
+    <string name="nav_notifications">Notifikasi</string>
+    <string name="nav_music">Musik</string>
+    <string name="nav_system">Sistem</string>
+    <string name="nav_personalize">Personalisasi</string>
+    <string name="nav_privacy">Privasi</string>
+    <string name="nav_about">Tentang</string>
+
+    <string name="overlay_notification_channel_name">Layanan Overlay LEOVANISLAND</string>
+    <string name="overlay_notification_channel_desc">Menjaga kapsul Dynamic Island tetap aktif di atas aplikasi lain</string>
+    <string name="overlay_notification_title">LEOVANISLAND Aktif</string>
+    <string name="overlay_notification_text">Ketuk untuk mengatur tampilan Dynamic Island atau menghentikan layanan</string>
+
+    <string name="status_active">Aktif</string>
+    <string name="status_inactive">Nonaktif</string>
+    <string name="permission_granted">Diizinkan</string>
+    <string name="permission_missing">Belum Diizinkan</string>
+    <string name="btn_reset_defaults">Pulihkan Pengaturan Awal</string>
+</resources>
