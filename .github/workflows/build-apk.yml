@@ -26,21 +26,41 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Accept Android SDK Licenses
+      - name: Configure Pre-Installed Android SDK & Licenses
         run: |
-          yes | sdkmanager --licenses || true
+          SDK_DIR="${ANDROID_HOME:-/usr/local/lib/android/sdk}"
+          echo "ANDROID_HOME=$SDK_DIR" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$SDK_DIR" >> "$GITHUB_ENV"
+          sudo mkdir -p "$SDK_DIR/licenses"
+          sudo chmod -R a+rwX "$SDK_DIR"
+          cat << 'EOF' > "$SDK_DIR/licenses/android-sdk-license"
+          8933bad161af4178b1185d1a37fbf41ea5269c55
+          d56f5187479451eabf01fb78af6dfcb131a6481e
+          24333f8a63b6825ea9c5514f83c2829b004d1fee
+          EOF
+          cat << 'EOF' > "$SDK_DIR/licenses/android-sdk-preview-license"
+          84831b9409646a918e30573bab4c9c91346d8abd
+          504667f4c0de7af1a06de9f4b1727b84351f2910
+          EOF
+          cat << 'EOF' > "$SDK_DIR/licenses/android-sdk-arm-dbt-license"
+          859f317696f67ef3d7f30a50a5560e7834b43903
+          EOF
+          cat << 'EOF' > "$SDK_DIR/licenses/google-gdk-license"
+          33b6a2b64607f11b759f320ef9dff4ae5c47d97a
+          EOF
+          cat << 'EOF' > "$SDK_DIR/licenses/android-googletv-license"
+          601085b94cd77f0b54ff86406957099ebe79c4d6
+          EOF
+          cat << 'EOF' > "$SDK_DIR/licenses/android-googlexr-license"
+          ceff83576aac4f7f37cb98fe189e9fb3c49d3b81
+          EOF
 
       - name: Prepare Environment & Signing Keystores
         run: |
-          # 1. Ensure .env exists (copied from .env.example if not present)
           if [ ! -f ".env" ] && [ -f ".env.example" ]; then
             cp .env.example .env
           fi
 
-          # 2. Restore debug.keystore from debug.keystore.base64 if missing
           if [ ! -f "debug.keystore" ] && [ -f "debug.keystore.base64" ]; then
             tr -d '[:space:]' < debug.keystore.base64 | base64 -d > debug.keystore
           elif [ ! -f "debug.keystore" ]; then
@@ -55,7 +75,6 @@ jobs:
               -dname "CN=Android Debug,O=Android,C=US"
           fi
 
-          # 3. Generate fallback release keystore (my-upload-key.jks) for assembleRelease
           if [ ! -f "my-upload-key.jks" ]; then
             keytool -genkeypair -v \
               -keystore my-upload-key.jks \
@@ -68,10 +87,10 @@ jobs:
               -dname "CN=LEOVANISLAND,OU=Mobile,O=LeovanStudio,L=Jakarta,S=DKI,C=ID"
           fi
 
-      - name: Setup Gradle
+      - name: Setup Gradle 9.3.1
         uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: wrapper
+          gradle-version: '9.3.1'
 
       - name: Build Debug & Release APK
         env:
@@ -79,7 +98,7 @@ jobs:
           STORE_PASSWORD: leovanrelease123
           KEY_PASSWORD: leovanrelease123
         run: |
-          gradle :app:assembleDebug :app:assembleRelease --stacktrace
+          gradle :app:assembleDebug :app:assembleRelease --no-configuration-cache --stacktrace
 
       - name: Prepare Named APK Outputs
         run: |
